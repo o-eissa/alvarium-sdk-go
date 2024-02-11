@@ -15,10 +15,11 @@ package annotators
 
 import (
 	"context"
+	"os"
+
 	"github.com/project-alvarium/alvarium-sdk-go/pkg/config"
 	"github.com/project-alvarium/alvarium-sdk-go/pkg/contracts"
 	"github.com/project-alvarium/alvarium-sdk-go/pkg/interfaces"
-	"os"
 )
 
 // SourceAnnotator is used to provide lineage from one version of data to another as the result of a change or transformation.
@@ -39,8 +40,9 @@ func NewSourceAnnotator(cfg config.SdkInfo) interfaces.Annotator {
 func (a *SourceAnnotator) Do(ctx context.Context, data []byte) (contracts.Annotation, error) {
 	key := DeriveHash(a.hash, data)
 	hostname, _ := os.Hostname()
+	imageTag := os.Getenv(contracts.ImageTagEnvKey)
 
-	annotation := contracts.NewAnnotation(key, a.hash, hostname, a.kind, true)
+	annotation := contracts.NewAnnotation(key, a.hash, hostname, imageTag, a.kind, true)
 	sig, err := SignAnnotation(a.sign.PrivateKey, annotation)
 	if err != nil {
 		return contracts.Annotation{}, err
